@@ -49,10 +49,10 @@
     (modify-syntax-entry ?\` "\"" table)
     (modify-syntax-entry ?\! "<" table)
     (modify-syntax-entry ?\n ">" table)
-    (modify-syntax-entry ?\\ "\\" table)
+    (modify-syntax-entry ?\\ "." table)
     (modify-syntax-entry ?$ "." table)
     (modify-syntax-entry ?_ "_" table)
-    (modify-syntax-entry ?: "_" table)
+    (modify-syntax-entry ?: "." table)
     (modify-syntax-entry ?< "." table)
     (modify-syntax-entry ?> "." table)
     (modify-syntax-entry ?& "." table)
@@ -82,15 +82,23 @@ See `font-lock-syntax-table'.")
 
 (defconst rapid-font-lock-keyword-beg-re "\\(?:^\\|[^.@$]\\|\\.\\.\\)")
 
+(defconst rapid-ident-re "[A-Za-z][A-Za-z0-9_]+")
+
+(defun rapid-re-group (re capture)
+  "Wrap RE as a group depending on CAPTURE."
+  (if capture
+      (concat "\\(" re "\\)")
+    (concat "\\(?:" re "\\)")))
+
 (defconst rapid-font-lock-keywords
   `(;; Procs.
-    ("^\\s *proc\\s +\\([^( \t\n]+\\)"
+    (,(concat "^\\s *proc\\s +" (rapid-re-group rapid-ident-re t))
      1 font-lock-function-name-face)
     ;; Funcs.
-    ("^\\s *func\\s +\\(?:[^( \t\n]+\\)\\s +\\([^( \t\n]+\\)"
+    (,(concat "^\\s *func\\s +" (rapid-re-group rapid-ident-re nil) "\\s +" (rapid-re-group rapid-ident-re t))
      1 font-lock-function-name-face)
     ;; Records.
-    ("^\\s *record\\s +\\([^( \t\n]+\\)"
+    (,(concat "^\\s *record\\s +" (rapid-re-group rapid-ident-re t))
      1 font-lock-type-face)
     ;; Keywords.
     (,(concat
@@ -156,10 +164,10 @@ See `font-lock-syntax-table'.")
         'symbols))
      (1 font-lock-keyword-face))
     ;; Vars.
-    (,(concat (regexp-opt '("var" "pers" "const")) "\\s +\\(?:[^( \t\n]+\\)\\s +\\([^( \t\n]+\\)")
+    (,(concat (regexp-opt '("var" "pers" "const")) "\\s +" (rapid-re-group rapid-ident-re nil) "\\s +" (rapid-re-group rapid-ident-re t))
      1 font-lock-variable-name-face)
     ;; Types.
-    (,(concat (regexp-opt '("var" "pers" "const")) "\\s +\\([^( \t\n]+\\)")
+    (,(concat (regexp-opt '("var" "pers" "const")) "\\s +" (rapid-re-group rapid-ident-re t))
      (1 font-lock-type-face))
     )
   "Additional expressions to highlight in RAPID mode.")
