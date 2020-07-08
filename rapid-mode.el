@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 
-;; Provides font-locking and indentation support.
+;; Provides basic syntax highlighting.
 
 ;;; Code:
 
